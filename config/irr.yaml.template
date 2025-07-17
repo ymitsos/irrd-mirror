@@ -1,0 +1,123 @@
+irrd:
+    piddir: /run/irrd
+    database_url: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}?keepalives=1&keepalives_idle=5
+    redis_url: ${REDIS_SOCKET_PATH}
+    user: nobody
+    group: nogroup
+
+    access_lists:
+        allow_all:
+            - '0.0.0.0/0'
+            - '::/0'
+
+    server:
+        http:
+           status_access_list: allow_all
+            interface: '::0'
+            port: 8080
+            url: "http://irrd"
+        whois:
+            interface: '::0'
+            max_connections: 10
+            port: 43
+    auth:
+      gnupg_keyring: /var/lib/irrd4/pgp_keys
+
+    email:
+        footer: 'email footer'
+        from: noreply@synapsecom.gr
+        smtp: localhost
+        notification_header: |
+            This is to notify you of changes in the {sources_str} database
+            or object authorisation failures.
+
+            You may receive this message because you are listed in
+            the notify attribute on the changed object(s), or because
+            you are listed in the mnt-nfy or upd-to attribute on a maintainer
+            of the object(s).
+
+    log:
+        logfile_path: /var/log/irrd/irrd.log
+        level: DEBUG
+
+    rpki:
+      roa_source: https://rpki.gin.ntt.net/api/export.json
+      roa_import_timer: 3600
+      pseudo_irr_remarks: |
+        This AS{asn} route object represents routing data retrieved
+        from the RPKI. This route object is the result of an automated
+        RPKI-to-IRR conversion process performed by IRRd.
+
+    sources_default:
+      - NTTCOM
+      - RIPE
+      - RIPE-NONAUTH
+      - RADB
+      - ALTDB
+      - LEVEL3
+      - APNIC
+      - ARIN
+      - AFRINIC
+
+    sources:
+      RIPE:
+        authoritative: false
+        import_timer: 86400
+        import_source:
+          - https://ftp.ripe.net/ripe/dbase/split/ripe.db.as-set.gz
+          - https://ftp.ripe.net/ripe/dbase/split/ripe.db.aut-num.gz
+          - https://ftp.ripe.net/ripe/dbase/split/ripe.db.route-set.gz
+          - https://ftp.ripe.net/ripe/dbase/split/ripe.db.route.gz
+          - https://ftp.ripe.net/ripe/dbase/split/ripe.db.route6.gz
+
+      RIPE-NONAUTH:
+        authoritative: false
+        import_timer: 86400
+        import_source:
+          - https://ftp.ripe.net/ripe/dbase/ripe-nonauth.db.gz
+
+      NTTCOM:
+        authoritative: false
+        import_timer: 86400
+        import_source:
+          - ftp://rr1.ntt.net/nttcomRR/nttcom.db.gz
+
+      RADB:
+        authoritative: false
+        import_timer: 86400
+        import_source:
+          - ftp://ftp.radb.net/radb/dbase/radb.db.gz
+
+      ALTDB:
+        authoritative: false
+        import_timer: 86400
+        import_source:
+          - ftp://ftp.altdb.net/pub/altdb/altdb.db.gz 
+
+      LEVEL3:
+        authoritative: false
+        import_timer: 86400
+        import_source:
+          - ftp://rr.level3.net/pub/rr/level3.db.gz
+
+      APNIC:
+        authoritative: false
+        import_timer: 86400
+        import_source:
+          - https://ftp.apnic.net/apnic/whois/apnic.db.as-set.gz
+          - https://ftp.apnic.net/apnic/whois/apnic.db.aut-num.gz
+          - https://ftp.apnic.net/apnic/whois/apnic.db.route-set.gz
+          - https://ftp.apnic.net/apnic/whois/apnic.db.route.gz
+          - https://ftp.apnic.net/apnic/whois/apnic.db.route6.gz
+
+      ARIN:
+        authoritative: false
+        import_timer: 86400
+        import_source:
+          - https://ftp.arin.net/pub/rr/arin.db.gz
+
+      AFRINIC:
+        authoritative: false
+        import_timer: 86400
+        import_source:
+          - https://ftp.afrinic.net/pub/dbase/afrinic.db.gz

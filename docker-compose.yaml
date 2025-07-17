@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:15
+    env_file:
+      - configuration.env
+    command: >
+      postgres -c max_wal_size=2GB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "PGUSER=irrd pg_isready -d irrd" ]
+      interval: 15s
+      timeout: 15s
+      retries: 5
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis-socket:/var/run/redis
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    entrypoint: >
+      sh -c "mkdir -p /var/run/redis &&
+             chown redis:redis /var/run/redis &&
+             exec redis-server /usr/local/etc/redis/redis.conf"
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -h localhost ping" ]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+
+  irrd:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "43:43"
+      - "8080:8080"
+    volumes:
+      - irrd-data:/var/lib/irrd4
+    env_file:
+      - configuration.env
+    entrypoint: ["./entrypoint.sh"]
+
+
+volumes:
+  pgdata:
+  irrd-data:
+  redis-socket:
