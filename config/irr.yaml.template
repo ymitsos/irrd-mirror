@@ -12,7 +12,7 @@ irrd:
 
     server:
         http:
-           status_access_list: allow_all
+            status_access_list: allow_all
             interface: '::0'
             port: 8080
             url: "http://irrd"
