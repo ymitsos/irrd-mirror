@@ -25,7 +25,7 @@ irrd:
 
     email:
         footer: 'email footer'
-        from: noreply@synapsecom.gr
+        from: noreply@example.com
         smtp: localhost
         notification_header: |
             This is to notify you of changes in the {sources_str} database
